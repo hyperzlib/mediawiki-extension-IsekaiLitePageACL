@@ -13,7 +13,8 @@ return [
 	'IsekaiLitePageACL.RoleStore' => static function ( MediaWikiServices $services ) {
 		return new RoleStore(
 			$services->getDBLoadBalancer(),
-			$services->getMainWANObjectCache()
+			$services->getMainWANObjectCache(),
+			$services->getService( 'IsekaiLitePageACL.PermissionDefinitionRegistry' )
 		);
 	},
 	'IsekaiLitePageACL.PageAclStore' => static function ( MediaWikiServices $services ) {

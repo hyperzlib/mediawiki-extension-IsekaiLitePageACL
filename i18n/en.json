@@ -5,15 +5,13 @@
 		]
 	},
 	"isekai-lpacl": "Isekai Lite Page ACL",
-	"isekai-lpacl-desc": "Adds lightweight page-level ACL management for edit and manage operations.",
+	"isekai-lpacl-desc": "Adds lightweight page-level ACL management for editing, moving, grants, and subpage operations.",
 	"isekailitepageacl": "Page permissions",
 	"isekailitepageaclrole": "Page permission roles",
 	"right-isekai-lpacl-admin": "Bypass and administer Isekai Lite Page ACL page permissions",
 	"right-isekai-lpacl-role-admin": "Manage Isekai Lite Page ACL roles",
 	"isekai-lpacl-permission-edit": "Edit",
 	"isekai-lpacl-permission-edit-help": "Allows editing the page.",
-	"isekai-lpacl-permission-manage": "Manage",
-	"isekai-lpacl-permission-manage-help": "Allows viewing and changing page ACL settings.",
 	"isekai-lpacl-permission-create-subpage": "Create subpages",
 	"isekai-lpacl-permission-create-subpage-help": "Allows creating subpages under this page.",
 	"apihelp-isekailpacl-summary": "Returns Isekai Lite Page ACL data for pages.",
@@ -89,5 +87,14 @@
 	"isekai-lpacl-role-error-not-found": "The requested role does not exist.",
 	"isekai-lpacl-role-error-bad-key": "The role key is invalid.",
 	"isekai-lpacl-special-placeholder": "The backend is available. The graphical editor can be connected to this page through ResourceLoader.",
-	"isekai-lpacl-role-placeholder": "Role management APIs are available. The graphical role editor can be connected here."
+	"isekai-lpacl-role-placeholder": "Role management APIs are available. The graphical role editor can be connected here.",
+	"isekai-lpacl-permission-grant": "Grant permissions",
+	"isekai-lpacl-permission-grant-help": "Allows viewing and changing page ACL settings.",
+	"isekai-lpacl-permission-move": "Move",
+	"isekai-lpacl-permission-move-help": "Allows moving the page.",
+	"isekai-lpacl-permission-edit-subpage": "Edit subpages",
+	"isekai-lpacl-permission-edit-subpage-help": "Allows editing subpages under this page.",
+	"isekai-lpacl-permission-move-subpage": "Move subpages",
+	"isekai-lpacl-permission-move-subpage-help": "Allows moving subpages under this page.",
+	"isekai-lpacl-move-denied": "You do not have page-level move permission for this page."
 }

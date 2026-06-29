@@ -64,7 +64,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 			return;
 		}
 
-		$status = $this->permissionManager->userHasPermission( $this->getUser(), $title, 'manage' );
+		$status = $this->permissionManager->userHasPermission( $this->getUser(), $title, 'grant' );
 		if ( !$status->isOK() ) {
 			$this->displayRestrictionError();
 			return;

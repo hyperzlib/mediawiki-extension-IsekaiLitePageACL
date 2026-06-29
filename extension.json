@@ -88,20 +88,30 @@
 				"admin_grantable": true,
 				"default_grants": {
 					"creator": true,
-					"editor": false,
 					"user": false
 				},
 				"implies": []
 			},
-			"manage": {
-				"label": "isekai-lpacl-permission-manage",
-				"help": "isekai-lpacl-permission-manage-help",
+			"move": {
+				"label": "isekai-lpacl-permission-move",
+				"help": "isekai-lpacl-permission-move-help",
+				"sort": 150,
+				"page_creator_grantable": true,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
+					"user": false
+				},
+				"implies": []
+			},
+			"grant": {
+				"label": "isekai-lpacl-permission-grant",
+				"help": "isekai-lpacl-permission-grant-help",
 				"sort": 200,
 				"page_creator_grantable": false,
 				"admin_grantable": true,
 				"default_grants": {
 					"creator": true,
-					"editor": false,
 					"user": false
 				},
 				"implies": [
@@ -111,12 +121,35 @@
 			"create-subpage": {
 				"label": "isekai-lpacl-permission-create-subpage",
 				"help": "isekai-lpacl-permission-create-subpage-help",
-				"sort": 400,
+				"sort": 300,
 				"page_creator_grantable": true,
 				"admin_grantable": true,
 				"default_grants": {
 					"creator": true,
-					"editor": false,
+					"user": false
+				},
+				"implies": []
+			},
+			"edit-subpage": {
+				"label": "isekai-lpacl-permission-edit-subpage",
+				"help": "isekai-lpacl-permission-edit-subpage-help",
+				"sort": 310,
+				"page_creator_grantable": true,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
+					"user": false
+				},
+				"implies": []
+			},
+			"move-subpage": {
+				"label": "isekai-lpacl-permission-move-subpage",
+				"help": "isekai-lpacl-permission-move-subpage-help",
+				"sort": 320,
+				"page_creator_grantable": true,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
 					"user": false
 				},
 				"implies": []
@@ -134,20 +167,30 @@
 					"admin_grantable": true,
 					"default_grants": {
 						"creator": true,
-						"editor": false,
 						"user": false
 					},
 					"implies": []
 				},
-				"manage": {
-					"label": "isekai-lpacl-permission-manage",
-					"help": "isekai-lpacl-permission-manage-help",
+				"move": {
+					"label": "isekai-lpacl-permission-move",
+					"help": "isekai-lpacl-permission-move-help",
+					"sort": 150,
+					"page_creator_grantable": true,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
+						"user": false
+					},
+					"implies": []
+				},
+				"grant": {
+					"label": "isekai-lpacl-permission-grant",
+					"help": "isekai-lpacl-permission-grant-help",
 					"sort": 200,
 					"page_creator_grantable": false,
 					"admin_grantable": true,
 					"default_grants": {
 						"creator": true,
-						"editor": false,
 						"user": false
 					},
 					"implies": [
@@ -157,12 +200,35 @@
 				"create-subpage": {
 					"label": "isekai-lpacl-permission-create-subpage",
 					"help": "isekai-lpacl-permission-create-subpage-help",
-					"sort": 400,
+					"sort": 300,
 					"page_creator_grantable": true,
 					"admin_grantable": true,
 					"default_grants": {
 						"creator": true,
-						"editor": false,
+						"user": false
+					},
+					"implies": []
+				},
+				"edit-subpage": {
+					"label": "isekai-lpacl-permission-edit-subpage",
+					"help": "isekai-lpacl-permission-edit-subpage-help",
+					"sort": 310,
+					"page_creator_grantable": true,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
+						"user": false
+					},
+					"implies": []
+				},
+				"move-subpage": {
+					"label": "isekai-lpacl-permission-move-subpage",
+					"help": "isekai-lpacl-permission-move-subpage-help",
+					"sort": 320,
+					"page_creator_grantable": true,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
 						"user": false
 					},
 					"implies": []

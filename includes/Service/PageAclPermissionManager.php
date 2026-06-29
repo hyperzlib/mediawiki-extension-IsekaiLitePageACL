@@ -15,7 +15,6 @@ use MediaWiki\User\UserIdentity;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 class PageAclPermissionManager {
-	private const PERMISSION_CREATE_SUBPAGE = 'create-subpage';
 
 	private PermissionDefinitionRegistry $permissionRegistry;
 	private RoleStore $roleStore;
@@ -89,32 +88,103 @@ class PageAclPermissionManager {
 	}
 
 	public function userCanCreateSubpageAtTarget( UserIdentity $user, PageIdentity $target ): PermissionStatus {
-		$status = PermissionStatus::newEmpty();
-		if ( !$this->permissionRegistry->hasPermission( self::PERMISSION_CREATE_SUBPAGE ) ) {
-			$status->fatal( 'apierror-isekai-lpacl-badpermission' );
-			return $status;
-		}
-		if ( $this->isAdmin( $user ) ) {
-			return $status;
-		}
-		if ( !$target->canExist() ) {
-			return $status;
-		}
+		return $this->userHasParentPermissionAtTarget(
+			$user,
+			$target,
+			'create-subpage',
+			'isekai-lpacl-create-subpage-denied',
+			true
+		);
+	}
 
-		$parentTitle = $this->getNearestExistingParentTitle( $target );
-		if ( $parentTitle ) {
-			return $this->userHasPermission( $user, $parentTitle, self::PERMISSION_CREATE_SUBPAGE );
+	public function userCanEditPage( UserIdentity $user, PageIdentity $page, bool $isSubPage ): PermissionStatus {
+		if ( !$isSubPage ) {
+			return $this->userHasPermission( $user, $page, 'edit' );
 		}
+		return $this->userHasPermissionCascading(
+			$user,
+			$page,
+			'edit',
+			'edit-subpage',
+			'isekai-lpacl-edit-denied',
+			false
+		);
+	}
 
-		if ( !$user->isRegistered() ) {
-			$status->fatal( 'isekai-lpacl-create-subpage-denied' );
+	public function userCanMovePage( UserIdentity $user, PageIdentity $page, bool $isSubPage ): PermissionStatus {
+		if ( !$isSubPage ) {
+			return $this->userHasPermission( $user, $page, 'move' );
+		}
+		return $this->userHasPermissionCascading(
+			$user,
+			$page,
+			'move',
+			'move-subpage',
+			'isekai-lpacl-move-denied',
+			false
+		);
+	}
+
+	/**
+	 * Check self permission first, then fall back to a different parent permission.
+	 *
+	 * @param UserIdentity $user
+	 * @param PageIdentity $page
+	 * @param string $selfPermission Permission to check on the page itself.
+	 * @param string $parentPermission Permission to check on the nearest existing parent.
+	 * @param string $deniedMessage i18n key when both checks fail.
+	 * @param bool $allowUserDefaultWithoutParent If true and no parent exists, allow
+	 *   registered users when the parent permission has default_grants.user = true.
+	 * @return PermissionStatus
+	 */
+	public function userHasPermissionCascading(
+		UserIdentity $user,
+		PageIdentity $page,
+		string $selfPermission,
+		string $parentPermission,
+		string $deniedMessage,
+		bool $allowUserDefaultWithoutParent = false
+	): PermissionStatus {
+		$status = $this->userHasPermission( $user, $page, $selfPermission );
+		if ( $status->isOK() ) {
 			return $status;
 		}
-		$definition = $this->permissionRegistry->getDefinition( self::PERMISSION_CREATE_SUBPAGE );
-		if ( !( $definition['default_grants']['user'] ?? false ) ) {
-			$status->fatal( 'isekai-lpacl-create-subpage-denied' );
-		}
-		return $status;
+		return $this->userHasParentPermissionAtTarget(
+			$user,
+			$page,
+			$parentPermission,
+			$deniedMessage,
+			$allowUserDefaultWithoutParent
+		);
+	}
+
+	/**
+	 * Check whether the user has the same permission on the page itself or the
+	 * nearest existing parent.
+	 *
+	 * @param UserIdentity $user
+	 * @param PageIdentity $page
+	 * @param string $permission Permission to check on self and parent.
+	 * @param string $deniedMessage i18n key when both checks fail.
+	 * @param bool $allowUserDefaultWithoutParent If true and no parent exists, allow
+	 *   registered users when the permission has default_grants.user = true.
+	 * @return PermissionStatus
+	 */
+	public function userHasPermissionOrParent(
+		UserIdentity $user,
+		PageIdentity $page,
+		string $permission,
+		string $deniedMessage,
+		bool $allowUserDefaultWithoutParent = false
+	): PermissionStatus {
+		return $this->userHasPermissionCascading(
+			$user,
+			$page,
+			$permission,
+			$permission,
+			$deniedMessage,
+			$allowUserDefaultWithoutParent
+		);
 	}
 
 	/**
@@ -170,7 +240,7 @@ class PageAclPermissionManager {
 				? \Status::newGood()
 				: \Status::newFatal( 'apierror-isekai-lpacl-permissionnotgrantable' );
 		}
-		$status = $this->userHasPermission( $performer, $page, 'manage' );
+		$status = $this->userHasPermission( $performer, $page, 'grant' );
 		if ( !$status->isOK() ) {
 			return \Status::newFatal( 'apierror-isekai-lpacl-permissiondenied' );
 		}
@@ -240,13 +310,54 @@ class PageAclPermissionManager {
 			$grant = $definition['default_grants'];
 			if (
 				( $grant['user'] ?? false ) ||
-				( ( $grant['creator'] ?? false ) && $this->pageAclStore->actorHasParticipantType( $page->getId(), $actorId, 'creator' ) ) ||
-				( ( $grant['editor'] ?? false ) && $this->pageAclStore->actorHasParticipantType( $page->getId(), $actorId, 'editor' ) )
+				( ( $grant['creator'] ?? false ) && $this->actorIsCreatorInPageChain( $page, $actorId ) )
 			) {
 				$defaults[] = $permission;
 			}
 		}
 		return $defaults;
+	}
+
+	private function actorIsCreatorInPageChain( PageIdentity $page, int $actorId ): bool {
+		foreach ( $this->getParentChainPageIds( $page ) as $pageId ) {
+			if ( $this->pageAclStore->actorHasParticipantType( $pageId, $actorId, 'creator' ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private function userHasParentPermissionAtTarget(
+		UserIdentity $user,
+		PageIdentity $target,
+		string $permission,
+		string $deniedMessage,
+		bool $allowUserDefaultWithoutParent
+	): PermissionStatus {
+		$status = PermissionStatus::newEmpty();
+		if ( !$this->permissionRegistry->hasPermission( $permission ) ) {
+			$status->fatal( 'apierror-isekai-lpacl-badpermission' );
+			return $status;
+		}
+		if ( $this->isAdmin( $user ) || !$target->canExist() ) {
+			return $status;
+		}
+
+		$parentTitle = $this->getNearestExistingParentTitle( $target );
+		if ( $parentTitle ) {
+			return $this->userHasPermission( $user, $parentTitle, $permission );
+		}
+
+		if (
+			$allowUserDefaultWithoutParent &&
+			$user->isRegistered() &&
+			( $this->permissionRegistry->getDefinition( $permission )['default_grants']['user'] ?? false )
+		) {
+			return $status;
+		}
+
+		$status->fatal( $deniedMessage );
+		return $status;
 	}
 
 	public function getTitleFromPageId( int $pageId ): ?Title {

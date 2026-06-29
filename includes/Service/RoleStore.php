@@ -7,17 +7,23 @@ use Wikimedia\Rdbms\ILoadBalancer;
 
 class RoleStore {
 	private const CACHE_TTL = 3600;
-	private const CACHE_VERSION = 'v1';
+	private const CACHE_VERSION = 'v2';
 
 	private ILoadBalancer $loadBalancer;
 	private WANObjectCache $cache;
+	private PermissionDefinitionRegistry $permissionRegistry;
 
 	/** @var array<string,array>|null */
 	private ?array $roleCache = null;
 
-	public function __construct( ILoadBalancer $loadBalancer, WANObjectCache $cache ) {
+	public function __construct(
+		ILoadBalancer $loadBalancer,
+		WANObjectCache $cache,
+		PermissionDefinitionRegistry $permissionRegistry
+	) {
 		$this->loadBalancer = $loadBalancer;
 		$this->cache = $cache;
+		$this->permissionRegistry = $permissionRegistry;
 	}
 
 	/**
@@ -73,8 +79,9 @@ class RoleStore {
 			}
 			foreach ( $permissions as $row ) {
 				$key = $byId[(int)$row->role_id] ?? null;
-				if ( $key !== null ) {
-					$roles[$key]['permissions'][] = (string)$row->permission;
+				$permission = (string)$row->permission;
+				if ( $key !== null && $this->permissionRegistry->hasPermission( $permission ) ) {
+					$roles[$key]['permissions'][] = $permission;
 				}
 			}
 		}

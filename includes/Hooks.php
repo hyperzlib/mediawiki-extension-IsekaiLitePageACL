@@ -66,19 +66,24 @@ class Hooks implements LoadExtensionSchemaUpdatesHook,
 			return;
 		}
 		if ( $title->getId() ) {
-			// 检测编辑权限
-			if ( $action !== 'edit' ) {
+			if ( $action === 'edit' ) {
+				$status = $this->permissionManager->userCanEditPage( $user, $title, $title->isSubpage() );
+				if ( !$status->isOK() ) {
+					$result = ApiMessage::create( wfMessage( 'isekai-lpacl-edit-denied' ), 'isekai-lpacl-edit-denied' );
+					return false;
+				}
 				return;
 			}
-			$status = $this->permissionManager->userHasPermission( $user, $title, 'edit' );
-			if ( !$status->isOK() ) {
-				$result = ApiMessage::create( wfMessage( 'isekai-lpacl-edit-denied' ), 'isekai-lpacl-edit-denied' );
-				return false;
+			if ( $action === 'move' ) {
+				$status = $this->permissionManager->userCanMovePage( $user, $title, $title->isSubpage() );
+				if ( !$status->isOK() ) {
+					$result = ApiMessage::create( wfMessage( 'isekai-lpacl-move-denied' ), 'isekai-lpacl-move-denied' );
+					return false;
+				}
 			}
 			return;
 		}
 		if ( $title->isSubpage() && ( $action === 'create' || $action === 'edit' ) ) {
-			// 检测创建子页面权限
 			$status = $this->permissionManager->userCanCreateSubpageAtTarget( $user, $title );
 			if ( !$status->isOK() ) {
 				$result = ApiMessage::create(
@@ -91,13 +96,20 @@ class Hooks implements LoadExtensionSchemaUpdatesHook,
 	}
 
 	public function onMovePageCheckPermissions( $oldTitle, $newTitle, $user, $reason, $status ) {
-		if ( !$newTitle instanceof PageIdentity || !$newTitle->canExist() ) {
+		if ( !$oldTitle instanceof PageIdentity || !$newTitle instanceof PageIdentity || !$newTitle->canExist() ) {
 			return;
 		}
-		$createStatus = $this->permissionManager->userCanCreateSubpageAtTarget( $user, $newTitle );
-		if ( !$createStatus->isOK() ) {
-			$status->fatal( 'isekai-lpacl-move-create-subpage-denied', $newTitle->getPrefixedText() );
+		$moveStatus = $this->permissionManager->userCanMovePage( $user, $oldTitle, $oldTitle->isSubpage() );
+		if ( !$moveStatus->isOK() ) {
+			$status->fatal( 'isekai-lpacl-move-denied', $oldTitle->getPrefixedText() );
 			return false;
+		}
+		if ( $newTitle->isSubpage() ) {
+			$createStatus = $this->permissionManager->userCanCreateSubpageAtTarget( $user, $newTitle );
+			if ( !$createStatus->isOK() ) {
+				$status->fatal( 'isekai-lpacl-move-create-subpage-denied', $newTitle->getPrefixedText() );
+				return false;
+			}
 		}
 	}
 
@@ -107,7 +119,7 @@ class Hooks implements LoadExtensionSchemaUpdatesHook,
 			return;
 		}
 
-		$status = $this->permissionManager->userHasPermission( $skin->getUser(), $title, 'manage' );
+		$status = $this->permissionManager->userHasPermission( $skin->getUser(), $title, 'grant' );
 		if ( !$status->isOK() ) {
 			return;
 		}
@@ -130,7 +142,6 @@ class Hooks implements LoadExtensionSchemaUpdatesHook,
 	): void {
 		if ( $wikiPage instanceof WikiPage ) {
 			$page = $wikiPage->getTitle();
-			$this->store->markParticipant( $page, $user, 'editor' );
 			if ( $revisionRecord && $revisionRecord->getParentId() === 0 ) {
 				$this->store->markParticipant( $page, $user, 'creator' );
 			}

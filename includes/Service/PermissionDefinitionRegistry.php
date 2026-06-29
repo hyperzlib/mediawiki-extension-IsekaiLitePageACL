@@ -93,7 +93,6 @@ class PermissionDefinitionRegistry {
 				'admin_grantable' => (bool)( $definition['admin_grantable'] ?? false ),
 				'default_grants' => [
 					'creator' => (bool)( $definition['default_grants']['creator'] ?? false ),
-					'editor' => (bool)( $definition['default_grants']['editor'] ?? false ),
 					'user' => (bool)( $definition['default_grants']['user'] ?? false ),
 				],
 				'implies' => array_values( array_unique( array_map( 'strval', $definition['implies'] ?? [] ) ) ),

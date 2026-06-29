@@ -190,14 +190,6 @@ class PageAclStore {
 				__METHOD__
 			);
 		}
-		if ( $type === 'editor' ) {
-			return (bool)$dbr->selectField(
-				'revision',
-				'1',
-				[ 'rev_page' => $pageId, 'rev_actor' => $actorId ],
-				__METHOD__
-			);
-		}
 		return false;
 	}
 

@@ -59,7 +59,7 @@ class ApiIsekaiPageAcl extends ApiBase {
 		}
 
 		if ( $action === 'setpageacl' ) {
-			$status = $manager->userHasPermission( $this->getUser(), $title, 'manage' );
+			$status = $manager->userHasPermission( $this->getUser(), $title, 'grant' );
 			if ( !$status->isOK() ) {
 				$this->dieWithError( 'apierror-isekai-lpacl-permissiondenied', 'permissiondenied' );
 			}

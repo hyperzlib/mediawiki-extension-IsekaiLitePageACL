@@ -5,15 +5,13 @@
 		]
 	},
 	"isekai-lpacl": "异世界百科轻量页面权限",
-	"isekai-lpacl-desc": "为编辑和管理操作添加轻量页面级 ACL 管理。",
+	"isekai-lpacl-desc": "为编辑、移动、授权和子页面操作提供轻量页面级 ACL 管理。",
 	"isekailitepageacl": "页面权限",
 	"isekailitepageaclrole": "页面权限用户组",
 	"right-isekai-lpacl-admin": "绕过并管理异世界百科轻量页面权限",
 	"right-isekai-lpacl-role-admin": "管理异世界百科轻量页面权限用户组",
 	"isekai-lpacl-permission-edit": "编辑",
 	"isekai-lpacl-permission-edit-help": "允许编辑页面。",
-	"isekai-lpacl-permission-manage": "管理",
-	"isekai-lpacl-permission-manage-help": "允许查看和修改页面权限设置。",
 	"apierror-isekai-lpacl-permissiondenied": "你没有执行此操作的权限。",
 	"apierror-isekai-lpacl-badpage": "请求的页面无效。",
 	"apierror-isekai-lpacl-missingpage": "请求的页面不存在。",
@@ -86,5 +84,14 @@
 	"isekai-lpacl-permission-create-subpage": "创建子页面",
 	"isekai-lpacl-permission-create-subpage-help": "允许在页面下创建子页面。",
 	"isekai-lpacl-create-subpage-denied": "你没有在目标页面下创建子页面的权限。",
-	"isekai-lpacl-move-create-subpage-denied": "你没有权限将页面移动到 $1，因为你不能在目标页面下创建子页面。"
+	"isekai-lpacl-move-create-subpage-denied": "你没有权限将页面移动到 $1，因为你不能在目标页面下创建子页面。",
+	"isekai-lpacl-permission-grant": "授权",
+	"isekai-lpacl-permission-grant-help": "允许查看和修改页面权限设置。",
+	"isekai-lpacl-permission-move": "移动（重命名）",
+	"isekai-lpacl-permission-move-help": "允许移动（重命名）当前页面。",
+	"isekai-lpacl-permission-edit-subpage": "编辑子页面",
+	"isekai-lpacl-permission-edit-subpage-help": "允许编辑此页面下的子页面。",
+	"isekai-lpacl-permission-move-subpage": "移动（重命名）子页面",
+	"isekai-lpacl-permission-move-subpage-help": "允许移动（重命名）此页面下的子页面。",
+	"isekai-lpacl-move-denied": "你没有此页面的页面级移动权限。"
 }
