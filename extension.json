@@ -20,17 +20,20 @@
 	},
 	"HookHandlers": {
 		"main": {
-			"class": "Isekai\\LitePageACL\\Hooks",
+			"class": "Isekai\\LitePageACL\\Hooks\\MainHooks",
 			"services": [
 				"IsekaiLitePageACL.PermissionManager",
 				"IsekaiLitePageACL.PageAclStore",
 				"DBLoadBalancer",
 				"JobQueueGroup"
 			]
+		},
+		"updater": {
+			"class": "Isekai\\LitePageACL\\Hooks\\UpdaterHooks"
 		}
 	},
 	"Hooks": {
-		"LoadExtensionSchemaUpdates": "main",
+		"LoadExtensionSchemaUpdates": "updater",
 		"GetUserPermissionsErrors": "main",
 		"MovePageCheckPermissions": "main",
 		"PageSaveComplete": "main",

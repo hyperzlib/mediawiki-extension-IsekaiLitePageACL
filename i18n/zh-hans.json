@@ -93,5 +93,10 @@
 	"isekai-lpacl-permission-edit-subpage-help": "允许编辑此页面下的子页面。",
 	"isekai-lpacl-permission-move-subpage": "移动（重命名）子页面",
 	"isekai-lpacl-permission-move-subpage-help": "允许移动（重命名）此页面下的子页面。",
-	"isekai-lpacl-move-denied": "你没有此页面的页面级移动权限。"
+	"isekai-lpacl-move-denied": "你没有此页面的页面级移动权限。",
+	"lpacl-role-page-admin-name": "页面管理员",
+	"lpacl-role-page-editor-name": "页面维护者",
+	"lpacl-role-page-contributor-name": "页面作者",
+	"lpacl-role-subpage-editor-name": "子页面维护者",
+	"lpacl-role-subpage-author-name": "子页面作者"
 }

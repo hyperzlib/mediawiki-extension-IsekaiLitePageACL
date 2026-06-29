@@ -96,5 +96,10 @@
 	"isekai-lpacl-permission-edit-subpage-help": "Allows editing subpages under this page.",
 	"isekai-lpacl-permission-move-subpage": "Move subpages",
 	"isekai-lpacl-permission-move-subpage-help": "Allows moving subpages under this page.",
-	"isekai-lpacl-move-denied": "You do not have page-level move permission for this page."
+	"isekai-lpacl-move-denied": "You do not have page-level move permission for this page.",
+	"lpacl-role-page-admin-name": "Page administrator",
+	"lpacl-role-page-editor-name": "Page maintainer",
+	"lpacl-role-page-contributor-name": "Page author",
+	"lpacl-role-subpage-editor-name": "Subpage maintainer",
+	"lpacl-role-subpage-author-name": "Subpage author"
 }

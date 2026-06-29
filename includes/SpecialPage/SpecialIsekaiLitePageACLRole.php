@@ -113,13 +113,7 @@ class SpecialIsekaiLitePageACLRole extends SpecialPage {
 			[ 'class' => 'ext-isekai-lpacl-panel-header' ],
 			Html::element( 'h2', [], $this->msg( 'isekai-lpacl-role-list-title' )->text() ) . $addButton
 		);
-		$this->getOutput()->addHTML( (string)new PanelLayout( [
-			'expanded' => false,
-			'padded' => true,
-			'framed' => true,
-			'classes' => [ 'ext-isekai-lpacl-panel' ],
-			'content' => new HtmlSnippet( $header . $this->renderRoleTable( $roles ) ),
-		] ) );
+		$this->getOutput()->addHTML( $header . $this->renderRoleTable( $roles ) );
 	}
 
 	private function showEditForm( ?string $roleKey = null, array $submitted = [], bool $forceAdd = false ): void {
