@@ -1,0 +1,32 @@
+.ext-isekai-lpacl-panel {
+	margin: 1em 0;
+}
+
+.ext-isekai-lpacl-panel-header {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	gap: 1em;
+}
+
+.ext-isekai-lpacl-panel-header h2 {
+	margin: 0;
+}
+
+.ext-isekai-lpacl-grant-table td:last-child {
+	white-space: nowrap;
+}
+
+.ext-isekai-lpacl-overridden {
+	background: #eaecf0;
+	opacity: 0.55;
+}
+
+.ext-isekai-lpacl-permission-details {
+	margin: 1em 0;
+}
+
+.ext-isekai-lpacl-help,
+.ext-isekai-lpacl-target {
+	color: #54595d;
+}

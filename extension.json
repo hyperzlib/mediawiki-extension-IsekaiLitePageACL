@@ -1,0 +1,194 @@
+{
+	"name": "IsekaiLitePageACL",
+	"namemsg": "isekai-lpacl",
+	"author": "Hyperzlib",
+	"version": "0.1.0",
+	"url": "https://git.isekai.cn/Isekai-Project/mediawiki-extension-IsekaiLitePageACL",
+	"descriptionmsg": "isekai-lpacl-desc",
+	"license-name": "MIT",
+	"type": "api",
+	"requires": {
+		"MediaWiki": ">= 1.43.0"
+	},
+	"MessagesDirs": {
+		"IsekaiLitePageACL": [
+			"i18n"
+		]
+	},
+	"AutoloadNamespaces": {
+		"Isekai\\LitePageACL\\": "includes"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "Isekai\\LitePageACL\\Hooks",
+			"services": [
+				"IsekaiLitePageACL.PermissionManager",
+				"IsekaiLitePageACL.PageAclStore",
+				"DBLoadBalancer",
+				"JobQueueGroup"
+			]
+		}
+	},
+	"Hooks": {
+		"LoadExtensionSchemaUpdates": "main",
+		"GetUserPermissionsErrors": "main",
+		"MovePageCheckPermissions": "main",
+		"PageSaveComplete": "main",
+		"PageMoveComplete": "main",
+		"SidebarBeforeOutput": "main"
+	},
+	"APIModules": {
+		"isekaipageacl": "Isekai\\LitePageACL\\Api\\ApiIsekaiPageAcl"
+	},
+	"APIPropModules": {
+		"isekailpacl": "Isekai\\LitePageACL\\Api\\ApiQueryIsekaiLpacl"
+	},
+	"APIMetaModules": {
+		"isekailpaclconfig": "Isekai\\LitePageACL\\Api\\ApiQueryIsekaiLpaclConfig"
+	},
+	"SpecialPages": {
+		"IsekaiLitePageACL": "Isekai\\LitePageACL\\SpecialPage\\SpecialIsekaiLitePageACL",
+		"IsekaiLitePageACLRole": "Isekai\\LitePageACL\\SpecialPage\\SpecialIsekaiLitePageACLRole"
+	},
+	"SpecialPageAliases": {
+		"IsekaiLitePageACL": [
+			"IsekaiLitePageACL",
+			"PageACL"
+		],
+		"IsekaiLitePageACLRole": [
+			"IsekaiLitePageACLRole",
+			"PageACLRole"
+		]
+	},
+	"ServiceWiringFiles": [
+		"IsekaiLitePageACL.services.php"
+	],
+	"JobClasses": {
+		"IsekaiLitePageACLRebuildInheritanceIndex": "Isekai\\LitePageACL\\Job\\RebuildInheritanceIndexJob"
+	},
+	"GroupPermissions": {
+		"sysop": {
+			"isekai-lpacl-admin": true,
+			"isekai-lpacl-role-admin": true
+		}
+	},
+	"GrantPermissions": {
+		"isekai-lpacl-admin": {
+			"isekai-lpacl-admin": true,
+			"isekai-lpacl-role-admin": true
+		}
+	},
+	"attributes": {
+		"IsekaiLitePageACLPermissions": {
+			"edit": {
+				"label": "isekai-lpacl-permission-edit",
+				"help": "isekai-lpacl-permission-edit-help",
+				"sort": 100,
+				"page_creator_grantable": true,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
+					"editor": false,
+					"user": false
+				},
+				"implies": []
+			},
+			"manage": {
+				"label": "isekai-lpacl-permission-manage",
+				"help": "isekai-lpacl-permission-manage-help",
+				"sort": 200,
+				"page_creator_grantable": false,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
+					"editor": false,
+					"user": false
+				},
+				"implies": [
+					"edit"
+				]
+			},
+			"create-subpage": {
+				"label": "isekai-lpacl-permission-create-subpage",
+				"help": "isekai-lpacl-permission-create-subpage-help",
+				"sort": 400,
+				"page_creator_grantable": true,
+				"admin_grantable": true,
+				"default_grants": {
+					"creator": true,
+					"editor": false,
+					"user": false
+				},
+				"implies": []
+			}
+		}
+	},
+	"config": {
+		"IsekaiLitePageACLPermissions": {
+			"value": {
+				"edit": {
+					"label": "isekai-lpacl-permission-edit",
+					"help": "isekai-lpacl-permission-edit-help",
+					"sort": 100,
+					"page_creator_grantable": true,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
+						"editor": false,
+						"user": false
+					},
+					"implies": []
+				},
+				"manage": {
+					"label": "isekai-lpacl-permission-manage",
+					"help": "isekai-lpacl-permission-manage-help",
+					"sort": 200,
+					"page_creator_grantable": false,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
+						"editor": false,
+						"user": false
+					},
+					"implies": [
+						"edit"
+					]
+				},
+				"create-subpage": {
+					"label": "isekai-lpacl-permission-create-subpage",
+					"help": "isekai-lpacl-permission-create-subpage-help",
+					"sort": 400,
+					"page_creator_grantable": true,
+					"admin_grantable": true,
+					"default_grants": {
+						"creator": true,
+						"editor": false,
+						"user": false
+					},
+					"implies": []
+				}
+			}
+		}
+	},
+	"ResourceModules": {
+		"ext.isekaiLitePageACL.special": {
+			"scripts": [
+				"ext.isekaiLitePageACL.special.js"
+			],
+			"styles": [
+				"ext.isekaiLitePageACL.special.css"
+			],
+			"dependencies": [
+				"jquery",
+				"oojs-ui-core",
+				"oojs-ui-widgets",
+				"mediawiki.widgets.UserInputWidget"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "IsekaiLitePageACL/modules"
+	},
+	"manifest_version": 2
+}
