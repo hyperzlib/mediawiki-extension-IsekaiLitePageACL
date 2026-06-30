@@ -38,7 +38,7 @@
 		"MovePageCheckPermissions": "main",
 		"PageSaveComplete": "main",
 		"PageMoveComplete": "main",
-		"SidebarBeforeOutput": "main"
+		"SidebarBeforeOutput": "Isekai\\LitePageACL\\Hooks\\SkinHooks::onSidebarBeforeOutput"
 	},
 	"APIModules": {
 		"isekaipageacl": "Isekai\\LitePageACL\\Api\\ApiIsekaiPageAcl"

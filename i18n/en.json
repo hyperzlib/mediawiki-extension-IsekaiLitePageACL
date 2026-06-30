@@ -52,6 +52,7 @@
 	"isekai-lpacl-user-label": "User",
 	"isekai-lpacl-roles-label": "Roles",
 	"isekai-lpacl-permissions-label": "Permissions",
+	"isekai-lpacl-specific-permissions-label": "Specific permissions",
 	"isekai-lpacl-direct-permissions-label": "Direct permissions",
 	"isekai-lpacl-role-permissions-label": "Permissions from roles",
 	"isekai-lpacl-actions-label": "Actions",

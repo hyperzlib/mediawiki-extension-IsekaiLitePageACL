@@ -22,8 +22,7 @@ use WikiPage;
 class MainHooks implements GetUserPermissionsErrorsHook,
 					       MovePageCheckPermissionsHook,
 					       PageSaveCompleteHook,
-					       PageMoveCompleteHook,
-					       SidebarBeforeOutputHook {
+					       PageMoveCompleteHook {
 
 	private PageAclPermissionManager $permissionManager;
 	private PageAclStore $store;
@@ -98,25 +97,6 @@ class MainHooks implements GetUserPermissionsErrorsHook,
 				return false;
 			}
 		}
-	}
-
-	public function onSidebarBeforeOutput( $skin, &$sidebar ): void {
-		$title = $skin->getTitle();
-		if ( !$title || !$title->canExist() || !$title->getId() ) {
-			return;
-		}
-
-		$status = $this->permissionManager->userHasPermission( $skin->getUser(), $title, 'grant' );
-		if ( !$status->isOK() ) {
-			return;
-		}
-
-		$sidebar['TOOLBOX']['isekai-lpacl-pageacl'] = [
-			'id' => 't-isekai-lpacl-pageacl',
-			'href' => SpecialPage::getTitleFor( 'IsekaiLitePageACL', $title->getPrefixedText() )->getLocalURL(),
-			'text' => $skin->msg( 'isekai-lpacl-sidebar-edit' )->text(),
-			'single-id' => 'isekai-lpacl-pageacl',
-		];
 	}
 
 	public function onPageSaveComplete(

@@ -8,6 +8,7 @@ use Isekai\LitePageACL\Service\PageAclStore;
 use Isekai\LitePageACL\Service\PageAclVersionConflictException;
 use Isekai\LitePageACL\Service\PermissionDefinitionRegistry;
 use Isekai\LitePageACL\Service\RoleStore;
+use Isekai\LitePageACL\Utils\HtmlUtils;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
@@ -22,6 +23,7 @@ use OOUI\HtmlSnippet;
 use OOUI\HorizontalLayout;
 use OOUI\PanelLayout;
 use OOUI\TextInputWidget;
+use OOUI\Widget;
 use SpecialPage;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -34,7 +36,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 	private ILoadBalancer $loadBalancer;
 
 	public function __construct() {
-		parent::__construct( 'IsekaiLitePageACL' );
+		parent::__construct( 'IsekaiLitePageACL', '', false );
 	}
 
 	public function doesWrites() {
@@ -160,19 +162,25 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 					'label' => $this->msg( 'isekai-lpacl-user-label' )->text(),
 					'align' => 'top',
 				] ),
+				new FieldLayout( new Widget( [
+					'content' => [
+						new ButtonInputWidget( [
+							'name' => 'submit',
+							'label' => $this->msg( 'isekai-lpacl-submit' )->text(),
+							'flags' => [ 'primary', 'progressive' ],
+							'type' => 'submit',
+						] )
+					]
+				] ), [
+					'align' => 'top'
+				] )
 			],
 		] );
 		$this->getOutput()->addHTML(
 			$this->renderForm(
 				$title,
 				[ 'action' => 'add' ],
-				$fieldset .
-				new ButtonInputWidget( [
-					'name' => 'submit',
-					'label' => $this->msg( 'isekai-lpacl-submit' )->text(),
-					'flags' => [ 'primary', 'progressive' ],
-					'type' => 'submit',
-				] )
+				$fieldset
 			)
 		);
 	}
@@ -212,6 +220,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 				'selected' => in_array( $roleKey, $grant['roles'], true ),
 			] ), [
 				'label' => $this->formatRoleLabel( $role ),
+				'helpInline' => true,
 				'help' => $role['description'] ?? '',
 				'align' => 'inline',
 			] );
@@ -227,6 +236,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 				'selected' => in_array( $permissionKey, $grant['permissions'], true ),
 			] ), [
 				'label' => $this->formatPermissionLabel( $definition ),
+				'helpInline' => true,
 				'help' => $this->msgIfExists( $definition['help'] ?? '' ),
 				'align' => 'inline',
 			] );
@@ -242,19 +252,19 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 					'label' => $this->msg( 'isekai-lpacl-user-label' )->text(),
 					'align' => 'top',
 				] ),
-				new FieldsetLayout( [
+				HtmlUtils::wrapByFieldLayout( new FieldsetLayout( [
 					'label' => $this->msg( 'isekai-lpacl-roles-label' )->text(),
 					'items' => $roleFields,
-				] ),
+				] ) )
 			],
 		] );
 
-		$permissionDetails = Html::rawElement(
+		$permissionDetails = HtmlUtils::wrapByFieldLayout( Html::rawElement(
 			'details',
 			[ 'class' => 'ext-isekai-lpacl-permission-details' ],
-			Html::element( 'summary', [], $this->msg( 'isekai-lpacl-permissions-label' )->text() ) .
+			Html::element( 'summary', [], $this->msg( 'isekai-lpacl-specific-permissions-label' )->text() ) .
 			new FieldsetLayout( [ 'items' => $permissionFields ] )
-		);
+		) );
 
 		$html .= $this->renderForm(
 			$title,
@@ -264,7 +274,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 			Html::hidden( 'actorId', (string)$actorId ) .
 			$fieldset .
 			$permissionDetails .
-			new HorizontalLayout( [
+			HtmlUtils::wrapByFieldLayout( new HorizontalLayout( [
 				'items' => [
 					new ButtonInputWidget( [
 						'name' => 'submit',
@@ -277,7 +287,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 						'href' => $this->getPageAclUrl( $title ),
 					] ),
 				],
-			] )
+			] ) )
 		);
 		$this->getOutput()->addHTML( $html );
 	}
@@ -415,13 +425,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 		return $this->renderForm(
 			$title,
 			[],
-			new PanelLayout( [
-				'expanded' => false,
-				'padded' => true,
-				'framed' => true,
-				'classes' => [ 'ext-isekai-lpacl-panel' ],
-				'content' => new HtmlSnippet( $content ),
-			] )
+			$content
 		);
 	}
 
@@ -438,31 +442,17 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 			[ 'class' => 'ext-isekai-lpacl-panel-header' ],
 			$heading . $addButton
 		);
-		return (string)new PanelLayout( [
-			'expanded' => false,
-			'padded' => true,
-			'framed' => true,
-			'classes' => [ 'ext-isekai-lpacl-panel' ],
-			'content' => new HtmlSnippet( $header . $this->renderGrantTable( $localAcl->grants, [], $title ) ),
-		] );
+		return $header . $this->renderGrantTable( $localAcl->grants, [], $title );
 	}
 
 	private function renderParentGrantPanel( Title $parentTitle, array $grant ): string {
-		return (string)new PanelLayout( [
-			'expanded' => false,
-			'padded' => true,
-			'framed' => true,
-			'classes' => [ 'ext-isekai-lpacl-panel' ],
-			'content' => new HtmlSnippet(
-				Html::element( 'h2', [], $this->msg( 'isekai-lpacl-parent-grant-title' )->text() ) .
-				$this->renderGrantTable( [ (int)$grant['actor_id'] => $grant ], [] ) .
-				Html::element(
-					'p',
-					[ 'class' => 'ext-isekai-lpacl-help' ],
-					$this->msg( 'isekai-lpacl-parent-grant-help', $parentTitle->getPrefixedText() )->text()
-				)
-			),
-		] );
+		return Html::element( 'h2', [], $this->msg( 'isekai-lpacl-parent-grant-title' )->text() ) .
+			$this->renderGrantTable( [ (int)$grant['actor_id'] => $grant ], [] ) .
+			Html::element(
+				'p',
+				[ 'class' => 'ext-isekai-lpacl-help' ],
+				$this->msg( 'isekai-lpacl-parent-grant-help', $parentTitle->getPrefixedText() )->text()
+			);
 	}
 
 	private function renderGrantTable( array $grants, array $overriddenActorIds = [], ?Title $title = null ): string {
@@ -653,5 +643,12 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 		}
 		$msg = $this->msg( $messageKey );
 		return $msg->exists() ? $msg->text() : $messageKey;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function getGroupName() {
+		return 'users';
 	}
 }

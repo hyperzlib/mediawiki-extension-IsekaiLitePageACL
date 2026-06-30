@@ -534,4 +534,11 @@ class SpecialIsekaiLitePageACLRole extends SpecialPage {
 	private function getTokenSalt(): string {
 		return 'isekai-lpacl-role';
 	}
+	
+	/**
+	 * @inheritDoc
+	 */
+	protected function getGroupName() {
+		return 'users';
+	}
 }

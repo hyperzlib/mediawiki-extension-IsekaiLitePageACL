@@ -45,6 +45,7 @@
 	"isekai-lpacl-user-label": "用户",
 	"isekai-lpacl-roles-label": "用户组",
 	"isekai-lpacl-permissions-label": "权限",
+	"isekai-lpacl-specific-permissions-label": "指定权限",
 	"isekai-lpacl-direct-permissions-label": "直接权限",
 	"isekai-lpacl-role-permissions-label": "来自用户组的权限",
 	"isekai-lpacl-actions-label": "操作",
