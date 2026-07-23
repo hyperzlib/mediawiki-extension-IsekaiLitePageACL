@@ -85,7 +85,7 @@ class ImportRevisionEditorsToPermissionTable extends Maintenance {
 					$this->output(
 						"Imported $written editor grants from $candidateCount candidates in page batch ending at $lastPageId.\n"
 					);
-					$loadBalancer->waitForReplication();
+					$this->waitForReplication();
 				}
 			}
 
