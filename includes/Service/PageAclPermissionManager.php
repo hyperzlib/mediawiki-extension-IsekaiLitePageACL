@@ -327,7 +327,7 @@ class PageAclPermissionManager {
 		return false;
 	}
 
-	private function userHasParentPermissionAtTarget(
+	public function userHasParentPermissionAtTarget(
 		UserIdentity $user,
 		PageIdentity $target,
 		string $permission,

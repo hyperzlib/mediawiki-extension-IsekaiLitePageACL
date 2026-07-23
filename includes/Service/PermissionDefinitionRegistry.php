@@ -72,9 +72,32 @@ class PermissionDefinitionRegistry {
 	 */
 	private function loadDefinitions(): array {
 		$raw = ExtensionRegistry::getInstance()->getAttribute( self::ATTRIBUTE_NAME );
-		if ( !$raw && $this->config->has( self::ATTRIBUTE_NAME ) ) {
-			$raw = $this->config->get( self::ATTRIBUTE_NAME );
+
+		if ( !is_array( $raw ) ) {
+			$raw = [];
 		}
+
+		// 配置文件覆盖默认项
+		if ( $this->config->has( self::ATTRIBUTE_NAME ) ) {
+			$override = $this->config->get( self::ATTRIBUTE_NAME );
+			if ( is_array( $override ) ) {
+				foreach ( $override as $key => $item ) {
+					if ( !is_array( $item ) ) {
+						continue;
+					}
+
+					if ( $item['override'] ?? false ) {
+						// 完整替换
+						$raw[$key] = $item;
+					} else {
+						foreach ( $item as $itemKey => $value ) {
+							$raw[$key][$itemKey] = $value;
+						}
+					}
+				}
+			}
+		}
+		
 		if ( !is_array( $raw ) ) {
 			return [];
 		}

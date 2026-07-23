@@ -80,7 +80,7 @@ class SpecialIsekaiLitePageACL extends SpecialPage {
 		$parentTitle = $this->getNearestExistingParentTitle( $title );
 
 		if ( $request->wasPosted() ) {
-			if ( !$this->getUser()->matchEditToken( $request->getVal( 'wpEditToken' ), $this->getTokenSalt( $title ) ) ) {
+			if ( !$this->getContext()->getCsrfTokenSet()->matchToken( $request->getVal( 'wpEditToken' ), $this->getTokenSalt( $title ) ) ) {
 				$out->addHTML( Html::errorBox( $this->msg( 'sessionfailure' )->escaped() ) );
 				return;
 			}
