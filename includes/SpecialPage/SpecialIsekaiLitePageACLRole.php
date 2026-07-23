@@ -50,7 +50,7 @@ class SpecialIsekaiLitePageACLRole extends SpecialPage {
 		$request = $this->getRequest();
 		$action = $request->getVal( 'action', 'list' );
 		if ( $request->wasPosted() ) {
-			if ( !$this->getUser()->matchEditToken( $request->getVal( 'wpEditToken' ), $this->getTokenSalt() ) ) {
+			if ( !$this->getContext()->getCsrfTokenSet()->matchToken( $request->getVal( 'wpEditToken' ), $this->getTokenSalt() ) ) {
 				$out->addHTML( Html::errorBox( $this->msg( 'sessionfailure' )->escaped() ) );
 				return;
 			}
