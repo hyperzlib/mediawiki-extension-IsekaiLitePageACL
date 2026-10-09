@@ -19,7 +19,7 @@ class ImportRevisionEditorsToPermissionTable extends Maintenance {
 		parent::__construct();
 
 		$this->addDescription(
-			'Import page editors from the revision table into isekai_lpacl_page_actor with a role.'
+			'Import page editors into isekai_lpacl_page_actor and backfill registered page creators in isekai_lpacl_participant.'
 		);
 		$this->addOption( 'role', 'Role key to grant to imported editors.', true, true );
 		$this->addOption( 'overwrite', 'Replace existing page actor grants for imported editor rows.' );
@@ -85,6 +85,17 @@ class ImportRevisionEditorsToPermissionTable extends Maintenance {
 					$this->output(
 						"Imported $written editor grants from $candidateCount candidates in page batch ending at $lastPageId.\n"
 					);
+					$this->waitForReplication();
+				}
+			}
+
+			$creatorCount = $this->ensureCreatorParticipants( $dbr, $dbw, $pageIds, $dryRun );
+			if ( $creatorCount > 0 ) {
+				$this->output( $dryRun
+					? "Found $creatorCount page creator participant records to add in page batch ending at $lastPageId.\n"
+					: "Added $creatorCount page creator participant records in page batch ending at $lastPageId.\n"
+				);
+				if ( !$dryRun ) {
 					$this->waitForReplication();
 				}
 			}
@@ -221,6 +232,72 @@ class ImportRevisionEditorsToPermissionTable extends Maintenance {
 				[ 'IGNORE' ]
 			);
 		}
+	}
+
+	/**
+	 * @param int[] $pageIds
+	 */
+	private function ensureCreatorParticipants(
+		IReadableDatabase $dbr,
+		IDatabase $dbw,
+		array $pageIds,
+		bool $dryRun
+	): int {
+		$existingRows = $dbr->select(
+			'isekai_lpacl_participant',
+			[ 'page_id', 'actor_id' ],
+			[ 'page_id' => $pageIds, 'participant_type' => 'creator' ],
+			__METHOD__
+		);
+		$existing = [];
+		foreach ( $existingRows as $row ) {
+			$existing[(int)$row->page_id][(int)$row->actor_id] = true;
+		}
+
+		$missing = [];
+		foreach ( $pageIds as $pageId ) {
+			$creator = $dbr->selectRow(
+				[ 'rev' => 'revision', 'actor' => 'actor' ],
+				[
+					'actor_id' => 'rev.rev_actor',
+					'first_seen' => 'rev.rev_timestamp',
+				],
+				[
+					'rev.rev_page' => $pageId,
+					'rev.rev_parent_id' => 0,
+					'actor.actor_id = rev.rev_actor',
+					$dbr->expr( 'actor.actor_user', '>', 0 ),
+				],
+				__METHOD__,
+				[ 'ORDER BY' => [ 'rev.rev_timestamp', 'rev.rev_id' ] ]
+			);
+			if ( !$creator ) {
+				continue;
+			}
+
+			$actorId = (int)$creator->actor_id;
+			if ( isset( $existing[$pageId][$actorId] ) ) {
+				continue;
+			}
+			$missing[] = [
+				'page_id' => $pageId,
+				'actor_id' => $actorId,
+				'participant_type' => 'creator',
+				'first_seen' => $creator->first_seen,
+				'last_seen' => $creator->first_seen,
+			];
+		}
+
+		if ( $dryRun || !$missing ) {
+			return count( $missing );
+		}
+
+		$inserted = 0;
+		foreach ( $missing as $row ) {
+			$dbw->insert( 'isekai_lpacl_participant', $row, __METHOD__, [ 'IGNORE' ] );
+			$inserted += $dbw->affectedRows();
+		}
+		return $inserted;
 	}
 
 	/**

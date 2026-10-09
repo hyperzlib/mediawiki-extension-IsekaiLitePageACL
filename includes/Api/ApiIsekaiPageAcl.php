@@ -10,7 +10,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ApiIsekaiPageAcl extends ApiBase {
 	public function execute(): void {
 		$params = $this->extractRequestParams();
-		$action = $params['ipaaction'];
+		$action = $params['lpaclaction'];
 		$services = MediaWikiServices::getInstance();
 		$titleFactory = $services->getTitleFactory();
 		$manager = $services->getService( 'IsekaiLitePageACL.PermissionManager' );
@@ -25,19 +25,19 @@ class ApiIsekaiPageAcl extends ApiBase {
 				$this->dieWithError( 'apierror-isekai-lpacl-permissiondenied', 'permissiondenied' );
 			}
 			if ( $action === 'disablerole' ) {
-				$roleStore->disableRole( $params['iparolekey'] );
+				$roleStore->disableRole( $params['lpaclrolekey'] );
 				$this->getResult()->addValue( null, $this->getModuleName(), [ 'result' => 'Success' ] );
 				return;
 			}
-			$permissions = $this->decodeJsonArray( $params['ipapermissions'] ?? '[]' );
+			$permissions = $this->decodeJsonArray( $params['lpaclpermissions'] ?? '[]' );
 			foreach ( $permissions as $permission ) {
 				if ( !$permissionRegistry->hasPermission( (string)$permission ) ) {
 					$this->dieWithError( 'apierror-isekai-lpacl-badpermission', 'badpermission' );
 				}
 			}
 			$role = $roleStore->saveRole(
-				$params['iparolekey'],
-				$params['iparoledescription'] ?? '',
+				$params['lpaclrolekey'],
+				$params['lpaclroledescription'] ?? '',
 				$permissions,
 				$actorNormalization->acquireActorId( $this->getUser(), $dbw )
 			);
@@ -46,10 +46,10 @@ class ApiIsekaiPageAcl extends ApiBase {
 		}
 
 		$title = null;
-		if ( $params['ipapageid'] ) {
-			$title = $manager->getTitleFromPageId( (int)$params['ipapageid'] );
-		} elseif ( $params['ipatitle'] ) {
-			$title = $titleFactory->newFromText( $params['ipatitle'] );
+		if ( $params['lpaclpageid'] ) {
+			$title = $manager->getTitleFromPageId( (int)$params['lpaclpageid'] );
+		} elseif ( $params['lpacltitle'] ) {
+			$title = $titleFactory->newFromText( $params['lpacltitle'] );
 		}
 		if ( !$title || !$title->canExist() ) {
 			$this->dieWithError( 'apierror-isekai-lpacl-badpage', 'badpage' );
@@ -63,14 +63,14 @@ class ApiIsekaiPageAcl extends ApiBase {
 			if ( !$status->isOK() ) {
 				$this->dieWithError( 'apierror-isekai-lpacl-permissiondenied', 'permissiondenied' );
 			}
-			$grants = $this->normalizeGrants( $params['ipagrants'] ?? '[]', $manager, $title, $roleStore, $permissionRegistry );
+			$grants = $this->normalizeGrants( $params['lpaclgrants'] ?? '[]', $manager, $title, $roleStore, $permissionRegistry );
 			try {
 				$data = $store->savePageAcl(
 					$title,
 					$this->getUser(),
-					(bool)$params['ipainherit'],
+					(bool)$params['lpaclinherit'],
 					$grants,
-					$params['ipaversion'] !== null ? (int)$params['ipaversion'] : null
+					$params['lpaclversion'] !== null ? (int)$params['lpaclversion'] : null
 				);
 			} catch ( PageAclVersionConflictException $e ) {
 				$this->dieWithError( 'apierror-isekai-lpacl-editconflict', 'editconflict' );
@@ -138,25 +138,25 @@ class ApiIsekaiPageAcl extends ApiBase {
 
 	public function getAllowedParams(): array {
 		return [
-			'ipaaction' => [
+			'lpaclaction' => [
 				ParamValidator::PARAM_REQUIRED => true,
 				ParamValidator::PARAM_TYPE => [ 'setpageacl', 'setrole', 'disablerole' ],
 			],
-			'ipapageid' => [
+			'lpaclpageid' => [
 				ParamValidator::PARAM_TYPE => 'integer',
 			],
-			'ipatitle' => null,
-			'ipaversion' => [
+			'lpacltitle' => null,
+			'lpaclversion' => [
 				ParamValidator::PARAM_TYPE => 'integer',
 			],
-			'ipainherit' => [
+			'lpaclinherit' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_DEFAULT => false,
 			],
-			'ipagrants' => null,
-			'iparolekey' => null,
-			'iparoledescription' => null,
-			'ipapermissions' => null,
+			'lpaclgrants' => null,
+			'lpaclrolekey' => null,
+			'lpaclroledescription' => null,
+			'lpaclpermissions' => null,
 		];
 	}
 }

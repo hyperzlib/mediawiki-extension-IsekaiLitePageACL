@@ -9,7 +9,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiQueryIsekaiLpacl extends ApiQueryBase {
 	public function __construct( ApiQuery $query, string $moduleName ) {
-		parent::__construct( $query, $moduleName, 'ipacl' );
+		parent::__construct( $query, $moduleName, 'lpacl' );
 	}
 
 	public function execute(): void {

@@ -8,7 +8,7 @@ use MediaWiki\MediaWikiServices;
 
 class ApiQueryIsekaiLpaclConfig extends ApiQueryBase {
 	public function __construct( ApiQuery $query, string $moduleName ) {
-		parent::__construct( $query, $moduleName, 'ipacfg' );
+		parent::__construct( $query, $moduleName, 'lpaclcfg' );
 	}
 
 	public function execute(): void {

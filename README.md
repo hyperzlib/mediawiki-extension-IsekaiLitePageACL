@@ -198,22 +198,30 @@ Special:IsekaiLitePageACL/页面标题
 
 ### 写入 API：`action=isekaipageacl`
 
-需要 `csrf` 令牌。
+所有写入操作必须使用 POST，并通过 `token` 参数提交 `csrf` 令牌。可先请求 `action=query&meta=tokens&type=csrf&format=json` 获取令牌。
 
-#### 设置页面 ACL
-
-设置指定页面的权限配置。
+写入请求的公共参数：
 
 | 参数 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `ipaaction` | ✓ | string | `setpageacl` |
-| `ipapageid` | 二选一 | integer | 页面 ID |
-| `ipatitle` | 二选一 | string | 页面标题 |
-| `ipaversion` | ✗ | integer | 当前 ACL 版本号（用于冲突检测） |
-| `ipainherit` | ✗ | boolean | 是否继承上级页面权限（默认 `false`） |
-| `ipagrants` | ✗ | string | JSON 格式的授权数组 |
+| `action` | ✓ | string | `isekaipageacl` |
+| `token` | ✓ | string | 当前用户的 CSRF 令牌 |
+| `format` | ✗ | string | MediaWiki 通用输出格式参数，示例使用 `json` |
 
-`ipagrants` 格式：
+#### 设置页面 ACL
+
+设置已存在页面的权限配置，需要当前用户拥有该页面的 `grant` 权限。提交的授权数组会替换该页面全部本地授权条目；省略 `lpaclgrants` 时按空数组处理。
+
+| 参数 | 必填 | 类型 | 说明 |
+|------|------|------|------|
+| `lpaclaction` | ✓ | string | `setpageacl` |
+| `lpaclpageid` | 二选一 | integer | 页面 ID；同时提交页面标题时优先使用 ID |
+| `lpacltitle` | 二选一 | string | 页面标题 |
+| `lpaclversion` | ✗ | integer | 预期的当前 ACL 版本号；已有 ACL 的版本不匹配时返回 `editconflict`，省略时跳过版本检查 |
+| `lpaclinherit` | ✗ | boolean | 是否继承上级页面权限；提交此参数即为 `true`，省略为 `false`，不要用 `0` 或 `false` 表示关闭 |
+| `lpaclgrants` | ✗ | string | JSON 格式的完整授权数组，省略时为 `[]` |
+
+`lpaclgrants` 格式：
 
 ```json
 [
@@ -225,28 +233,63 @@ Special:IsekaiLitePageACL/页面标题
 ]
 ```
 
+`actor_id` 是 MediaWiki 的 actor ID（正整数）。`roles` 和 `permissions` 可省略，分别按空数组处理；角色必须存在且已启用，直接权限必须已定义且当前用户可授予。
+
+POST 表单参数示例（JSON 字符串和令牌需按表单规则编码）：
+
+```text
+action=isekaipageacl
+lpaclaction=setpageacl
+lpaclpageid=42
+lpaclversion=1
+lpaclinherit=1
+lpaclgrants=[{"actor_id":123,"roles":["page-editor"],"permissions":["edit","move"]}]
+token=<CSRF令牌>
+format=json
+```
+
+成功时返回 `isekaipageacl.result = "Success"`，并在 `isekaipageacl.acl` 中返回保存后的 ACL。
+
 #### 管理角色
+
+需要 `isekai-lpacl-role-admin` 权限。`setrole` 创建或更新角色，`disablerole` 禁用角色。
 
 | 参数 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `ipaaction` | ✓ | string | `setrole` 或 `disablerole` |
-| `iparolekey` | ✓ | string | 角色键名 |
-| `iparoledescription` | ✗ | string | 角色描述 |
-| `ipapermissions` | ✗ | string | JSON 数组格式的权限键列表 |
+| `lpaclaction` | ✓ | string | `setrole` 或 `disablerole` |
+| `lpaclrolekey` | 操作需要 | string | 角色键名；参数声明未标记为必填，调用这两个操作时应提供 |
+| `lpaclroledescription` | ✗ | string | `setrole` 的角色描述，省略时为空字符串；`disablerole` 不使用 |
+| `lpaclpermissions` | ✗ | string | `setrole` 的 JSON 权限键数组，如 `["edit","move"]`，省略时为 `[]`；`disablerole` 不使用 |
+
+`setrole` 的描述和权限列表会覆盖已有值。成功时返回 `isekaipageacl.result = "Success"`；`setrole` 还返回 `isekaipageacl.role`。
 
 ### 查询 API
 
 #### `action=query&prop=isekailpacl`
 
-查询页面的 ACL 信息。
+查询页面的 ACL 信息，通过 MediaWiki 通用参数 `titles`、`pageids` 或 `revids` 选择页面。模块只为已存在的有效页面返回 ACL 数据。
 
 | 参数 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `ipaclprop` | ✗ | string[] | 返回内容：`local`（本地 ACL）、`effective`（合并后有效 ACL）、`inherit`（继承链）、`version`（版本号）。默认：`local\|inherit\|version` |
+| `lpaclprop` | ✗ | string[] | 返回内容：`local`（本地 ACL）、`effective`（合并后有效 ACL）、`inherit`（继承链）、`version`（版本号）。默认：`local\|inherit\|version` |
+
+多值使用 `|` 分隔。示例：
+
+```text
+api.php?action=query&prop=isekailpacl&pageids=42&lpaclprop=local|effective|inherit|version&format=json
+```
+
+结果位于各页面的 `isekailpacl` 字段中：`local` 返回本地 ACL，`effective` 返回合并后的授权列表，`inherit` 返回继承标志和 `chain_page_ids`，`version` 返回 `acl_version`。
 
 #### `action=query&meta=isekailpaclconfig`
 
-查询全局 ACL 配置，包括所有权限定义、所有角色、当前用户的角色管理权限。
+查询全局 ACL 配置，无模块专用参数。
+
+```text
+api.php?action=query&meta=isekailpaclconfig&format=json
+```
+
+结果位于 `query.isekailpaclconfig`，包含 `permissions`（权限定义）、`roles`（角色列表）、`can_manage_roles`（当前用户是否拥有 `isekai-lpacl-role-admin`）和 `is_admin`（当前用户是否拥有 `isekai-lpacl-admin`）。
 
 ## 钩子（Hooks）
 
@@ -288,7 +331,7 @@ $hookContainer->run( 'IsekaiLpaclUserCan', [ $user, $page, $permission, $decisio
 
 ### ImportRevisionEditorsToPermissionTable
 
-将修订历史中的编辑者批量导入为指定角色的权限条目。
+将修订历史中的编辑者批量导入为指定角色的权限条目，并为尚无参与记录的旧页面补录首个注册修订作者的 `creator` 参与记录。`--dry-run` 会分别显示待导入的授权和待补录的创建者记录。
 
 ```bash
 # 将所有编辑者导入为 "page-contributor" 角色
